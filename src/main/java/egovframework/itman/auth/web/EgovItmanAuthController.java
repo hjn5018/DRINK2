@@ -35,10 +35,10 @@ public class EgovItmanAuthController {
 		return "itman/user/join02";
 	}
 	
-	@RequestMapping("/user/emailCodeVerification.do")
-	public String emailCodeVerification() {
+	@RequestMapping("/user/verifyEmailCode.do")
+	public String verifyEmailCode() {
 		
-		return "itman/user/emailCodeVerification";
+		return "itman/user/verifyEmailCode";
 	}
 	
 	@RequestMapping("/user/join03.do")
@@ -79,7 +79,7 @@ public class EgovItmanAuthController {
 		try {
 			// 인증번호 유효성 검사
 			if(!verCode.equals(ecNum)) {
-				return alertMove(model, "인증번호가 일치하지 않습니다.", "/user/emailCodeVerification.do");
+				return alertMove(model, "인증번호가 일치하지 않습니다.", "/user/verifyEmailCode.do");
 			}
 			
 			// 인증시간 유효성 검사
@@ -87,7 +87,7 @@ public class EgovItmanAuthController {
 		    long regdate = sdf.parse(regDate).getTime();
 		    long now = System.currentTimeMillis();
 		    if (now - regdate > 1000 * 60 * 5) { // 5분 초과
-		    	return alertMove(model, "인증 유효 시간이 초과되었습니다.", "/user/emailCodeVerification.do");
+		    	return alertMove(model, "인증 유효 시간이 초과되었습니다.", "/user/verifyEmailCode.do");
 		    }
 		    
 	    	return "itman/user/changePassword";

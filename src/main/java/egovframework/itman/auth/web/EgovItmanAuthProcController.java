@@ -58,10 +58,10 @@ public class EgovItmanAuthProcController {
 
         session.setAttribute("memName", vo.getMemName());
         session.setAttribute("memMail", vo.getMemMail());
+    	session.setAttribute("memTel", vo.getMemTel());
         session.setAttribute("mode", mode);
         session.setAttribute("ecNum", procVO.getEcNum());
     	session.setAttribute("regDate", procVO.getRegDate());
-    	session.setAttribute("memTel", vo.getMemTel());
         if (mode.equals("회원가입")) {
         	// 암호 bCrypt
         	String hashedMemPw= pEncoder.encode(vo.getMemPw());
@@ -75,7 +75,7 @@ public class EgovItmanAuthProcController {
         System.err.println("ecNum: " + procVO.getEcNum());
         
         // 이메일 인증 코드 확인 페이지
-        return "redirect:/user/emailCodeVerification.do";
+        return "redirect:/user/verifyEmailCode.do";
 	}
 	
 	@PostMapping("/user/idCheck.do")
@@ -119,7 +119,7 @@ public class EgovItmanAuthProcController {
 		try {	
 			// 인증번호 유효성 검사
 			if(!verCode.equals(ecNum)) {
-				return alertMove(model, "인증번호가 일치하지 않습니다.", "/user/emailCodeVerification.do");
+				return alertMove(model, "인증번호가 일치하지 않습니다.", "/user/verifyEmailCode.do");
 			}
 			
 			// 인증 시간 유효성 검사
@@ -127,7 +127,7 @@ public class EgovItmanAuthProcController {
 	        long regdate = sdf.parse(regDate).getTime();
 	        long now = System.currentTimeMillis();
 	        if (now - regdate > 1000 * 60 * 5) { // 5분 초과
-	        	return alertMove(model, "인증 유효 시간이 초과되었습니다.", "/user/emailCodeVerification.do");
+	        	return alertMove(model, "인증 유효 시간이 초과되었습니다.", "/user/verifyEmailCode.do");
 	        }
 	        
 			vo.setMemPw(hashedMemPw);

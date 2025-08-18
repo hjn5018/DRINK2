@@ -57,7 +57,12 @@ public class EgovItmanMemberController {
     }
 	
 	@RequestMapping("/popup/phoneEdit.do")
-	public String phoneEdit(HttpSession hsession, Model model, RedirectAttributes rdab) {
+	public String phoneEdit(
+			HttpSession hsession,
+			Model model,
+			RedirectAttributes rdab
+			) {
+		
 		String memIdx = (String) hsession.getAttribute("memIdx");
 		if(memIdx != null) {
 			EgovItmanMemberVO vo = egovItmanMemberService.selectPhoneEdit(memIdx);
@@ -93,7 +98,8 @@ public class EgovItmanMemberController {
             @RequestParam("userPhone3") String p3,
             HttpSession hsession,
 			Model model,
-			RedirectAttributes rdab) {
+			RedirectAttributes rdab
+			) {
 		
 	     String memIdx = (String) hsession.getAttribute("memIdx");
 	
