@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="egovItmanEmployeeDAO">
+	
+	<select id="selectEmployeeList" parameterType="egovframework.itman.group.service.EgovItmanGroupVO" resultType="egovframework.itman.employee.service.EgovItmanEmployeeVO">
+	
+			SELECT
+				*
+			FROM 
+				ITM_EMPLOYE
+			WHERE
+				GRO_IDX = #{groIdx}
+			AND DEL_YN = 'N'
+				
+	</select>
+
+	<select id="selectEmploList" parameterType="egovframework.itman.employee.service.EgovItmanEmployeeSearchVO" resultType="egovMap">
+		SELECT
+			A.EMP_IDX,
+			A.EMP_NUM,
+			A.EMP_NAME,
+			B.DIV_NAME,
+			C.POS_NAME,
+			A.EMP_MAIL,
+			A.EMP_TEL,
+			D.EMP_ST_NAME
+		FROM
+			ITM_EMPLOYE A
+			LEFT JOIN ITM_DIVISION B ON A.DIV_IDX = B.DIV_IDX
+			LEFT JOIN ITM_POSITION C ON A.POS_IDX = C.POS_IDX
+			LEFT JOIN ITM_EMP_STATE D ON A.EMP_ST_IDX = D.EMP_ST_IDX
+		WHERE
+			A.GRO_IDX = #{groIdx}
+			AND A.DEL_YN = 'N'
+		<if test="searchKeyword != null and searchKeyword != ''">
+			<if test="searchCondition == 'name'">
+				AND A.EMP_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+			</if>
+			<if test="searchCondition == 'emp'">
+				AND A.EMP_NUM LIKE CONCAT('%', #{searchKeyword}, '%')
+			</if>
+			<if test="searchCondition == 'div'">
+				AND B.DIV_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+			</if>
+		</if>
+		
+		<if test="searchCondition != null and searchKeyword != null and searchKeyword != ''">
+		<choose>
+			<when test="searchCondition == 'name'">
+				AND A.EMP_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+			</when>
+			<when test="searchCondition == 'emp'">
+				AND A.EMP_NUM LIKE CONCAT('%', #{searchKeyword}, '%')
+			</when>
+			<when test="searchCondition == 'div'">
+				AND B.DIV_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+			</when>
+			<otherwise>
+				AND (
+					A.EMP_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+					OR A.EMP_NUM LIKE CONCAT('%', #{searchKeyword}, '%')
+					OR B.DIV_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+				)
+			</otherwise>
+		</choose>
+	</if>
+		
+		
+		
+		ORDER BY
+			A.EMP_IDX DESC
+		LIMIT #{firstIndex}, #{recordCountPerPage}
+		
+	</select>
+	
+	<select id="selectEmploListTotCnt" parameterType="egovframework.itman.employee.service.EgovItmanEmployeeSearchVO" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			ITM_EMPLOYE A
+			LEFT JOIN ITM_DIVISION B ON A.DIV_IDX = B.DIV_IDX
+		WHERE
+			A.GRO_IDX = #{groIdx}
+			AND A.DEL_YN = 'N'
+		<if test="searchKeyword != null and searchKeyword != ''">
+			<if test="searchCondition == 'name'">
+				AND A.EMP_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+			</if>
+			<if test="searchCondition == 'emp'">
+				AND A.EMP_NUM LIKE CONCAT('%', #{searchKeyword}, '%')
+			</if>
+			<if test="searchCondition == 'div'">
+				AND B.DIV_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+			</if>
+		</if>
+    </select>
+    
+<insert id="insertPosition" parameterType="egovframework.itman.employee.service.EgovItmanEmployeePositionVO">
+    INSERT INTO ITM_POSITION (
+        GRO_IDX,
+        POS_NAME,
+        POS_CODE,
+        DEL_YN,
+        REG_IDX,
+        REG_DATE
+    ) VALUES (
+        #{groIdx},
+        #{posName},
+        #{posCode},
+        'N',
+        #{regIdx},
+        NOW()
+    )
+</insert>
+<insert id="insertState" parameterType="egovframework.itman.employee.service.EgovItmanEmployeeStateVO">
+    INSERT INTO ITM_EMP_STATE (
+        GRO_IDX,
+        EMP_ST_NAME,
+        EMP_ST_CODE,
+        EMP_ST_YN,  DEL_YN,
+        REG_IDX,
+        REG_DATE
+    ) VALUES (
+        #{groIdx},
+        #{empStName},
+        #{empStCode},
+        'Y',        'N',
+        #{regIdx},
+        NOW()
+    )
+</insert>
+<select id="selectDivisionList" parameterType="String" resultType="egovframework.itman.division.service.EgovItmanDivisionVO">
+        SELECT
+            DIV_IDX,
+            DIV_NAME
+        FROM
+            ITM_DIVISION
+        WHERE
+            GRO_IDX = #{groIdx}
+        AND
+            DEL_YN = 'N'
+    </select>
+
+    <select id="selectPositionList" parameterType="String" resultType="egovframework.itman.employee.service.EgovItmanEmployeePositionVO">
+        SELECT
+            POS_IDX,
+            POS_NAME
+        FROM
+            ITM_POSITION
+        WHERE
+            GRO_IDX = #{groIdx}
+        AND
+            DEL_YN = 'N'
+    </select>
+
+    <select id="selectStateList" parameterType="String" resultType="egovframework.itman.employee.service.EgovItmanEmployeeStateVO">
+        SELECT
+            EMP_ST_IDX,
+            EMP_ST_NAME
+        FROM
+            ITM_EMP_STATE
+        WHERE
+            GRO_IDX = #{groIdx}
+        AND
+            DEL_YN = 'N'
+    </select>
+    <insert id="insertEmplo" parameterType="egovframework.itman.employee.service.EgovItmanEmployeeVO">
+        INSERT INTO ITM_EMPLOYE (
+            GRO_IDX,
+            EMP_NUM,
+            EMP_NAME,
+            EMP_MAIL,
+            EMP_TEL,
+            DIV_IDX,
+            POS_IDX,
+            EMP_ST_IDX,
+            DEL_YN,
+            REG_IDX,
+            REG_DATE
+        ) VALUES (
+            #{groIdx},
+            #{empNum},
+            #{empName},
+            #{empMail},
+            #{empTel},
+            #{divIdx},
+            #{posIdx},
+            #{empStIdx},
+            'N',
+            #{regIdx},
+            NOW()
+        )
+    </insert>
+ <select id="selectEmploView" parameterType="String" resultType="egovframework.itman.employee.service.EgovItmanEmployeeVO">
+        SELECT
+            A.EMP_IDX, A.EMP_NUM, A.EMP_NAME, A.EMP_MAIL, A.EMP_TEL,
+            B.DIV_NAME,
+            C.POS_NAME,
+            D.EMP_ST_NAME
+        FROM
+            ITM_EMPLOYE A
+            LEFT JOIN ITM_DIVISION B ON A.DIV_IDX = B.DIV_IDX
+            LEFT JOIN ITM_POSITION C ON A.POS_IDX = C.POS_IDX
+            LEFT JOIN ITM_EMP_STATE D ON D.EMP_ST_IDX = A.EMP_ST_IDX
+        WHERE
+            A.EMP_IDX = #{empIdx} AND A.DEL_YN = 'N'
+    </select>
+
+    <select id="selectEmploAssetList" parameterType="String" resultType="egovMap">
+        SELECT
+            A.ASS_IDX, A.ASS_ULID, A.ASS_NAME, A.BUY_DATE, A.IMAGE,
+            B.ASS_CAT_NAME
+        FROM
+            ITM_ASSET A
+            LEFT JOIN ITM_ASSET_CATEGORY B ON A.ASS_CAT_IDX = B.ASS_CAT_IDX
+        WHERE
+            A.EMP_IDX = #{empIdx}
+            AND A.DEL_YN = 'N'
+        ORDER BY 
+        	A.ASS_IDX DESC;
+    </select>
+    <update id="updateEmploNum" parameterType="egovframework.itman.employee.service.EgovItmanEmployeeVO">
+        UPDATE ITM_EMPLOYE
+        SET
+            EMP_NUM = #{empNum},
+            MOD_DATE = NOW()
+        WHERE
+            EMP_IDX = #{empIdx}
+    </update>
+    <update id="updateEmploName" parameterType="egovframework.itman.employee.service.EgovItmanEmployeeVO">
+        UPDATE ITM_EMPLOYE
+        SET
+            EMP_NAME = #{empName},
+            MOD_DATE = NOW()
+        WHERE
+            EMP_IDX = #{empIdx}
+    </update>
+     <update id="updateEmploMail" parameterType="egovframework.itman.employee.service.EgovItmanEmployeeVO">
+        UPDATE ITM_EMPLOYE
+        SET
+            EMP_MAIL = #{empMail},
+            MOD_DATE = NOW()
+        WHERE
+            EMP_IDX = #{empIdx}
+    </update>
+    
+    <update id="updateEmploTel" parameterType="egovframework.itman.employee.service.EgovItmanEmployeeVO">
+        UPDATE ITM_EMPLOYE
+        SET
+            EMP_TEL = #{empTel},
+            MOD_DATE = NOW()
+        WHERE
+            EMP_IDX = #{empIdx}
+    </update>
+    <update id="updateEmploDivision" parameterType="egovframework.itman.employee.service.EgovItmanEmployeeVO">
+        UPDATE ITM_EMPLOYE
+        SET
+            DIV_IDX = #{divIdx},
+            MOD_DATE = NOW()
+        WHERE
+            EMP_IDX = #{empIdx}
+    </update>
+     <update id="updateEmploPos" parameterType="egovframework.itman.employee.service.EgovItmanEmployeeVO">
+        UPDATE ITM_EMPLOYE
+        SET
+            POS_IDX = #{posIdx},
+            MOD_DATE = NOW()
+        WHERE
+            EMP_IDX = #{empIdx}
+    </update>
+   
+    <update id="updateEmploState" parameterType="egovframework.itman.employee.service.EgovItmanEmployeeVO">
+        UPDATE ITM_EMPLOYE
+        SET
+            EMP_ST_IDX = #{empStIdx},
+            MOD_DATE = NOW()
+        WHERE
+            EMP_IDX = #{empIdx}
+    </update>
+    <update id="deleteEmplo" parameterType="egovframework.itman.employee.service.EgovItmanEmployeeVO">
+        UPDATE ITM_EMPLOYE
+        SET
+            DEL_YN = 'Y',
+            DEL_DATE = NOW(),
+            DEL_IDX = #{delIdx}
+        WHERE
+            EMP_IDX = #{empIdx}
+    </update>
+
+	<select id="selectEmploBasicByGroup" parameterType="map" resultType="egovframework.itman.employee.service.EgovItmanEmployeeVO">
+		SELECT EMP_NUM as empNum, DIV_IDX as divIdx
+		FROM ITM_EMPLOYE
+		WHERE GRO_IDX = #{groIdx} AND EMP_IDX = #{empIdx} AND DEL_YN = 'N'
+	</select>
+	
+</mapper>

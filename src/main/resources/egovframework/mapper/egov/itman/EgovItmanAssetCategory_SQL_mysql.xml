@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovItmanAssetCategoryDAO">
+	<select id="selectAssetCategoryList" parameterType="Map" resultType="egovframework.itman.asset.category.service.EgovItmanAssetCategoryVO">
+		SELECT
+			*
+		FROM
+			ITM_ASSET_CATEGORY
+		WHERE
+			GRO_IDX = #{groIdx}
+		AND
+			DEL_YN = 'N'
+		<if test="search != null and like != null and like != '' ">
+			<choose>
+				<when test="search == 'code'">
+					AND ASS_CAT_CODE LIKE CONCAT('%', #{like}, '%')
+				</when>
+				<when test="search == 'name'">
+					AND ASS_CAT_NAME LIKE CONCAT('%', #{like}, '%')
+				</when>
+				<otherwise>
+					AND (
+						ASS_CAT_CODE LIKE CONCAT('%', #{like}, '%')
+					OR ASS_CAT_NAME LIKE CONCAT('%', #{like}, '%')
+					)
+			</otherwise>
+			</choose>
+		</if>
+		ORDER BY
+			ASS_CAT_IDX DESC
+
+		<choose>
+			<when test="start != null and pageResult != null">
+				LIMIT #{start}, #{pageResult}
+			</when>
+			<otherwise>
+				LIMIT 0, 10
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="selectAssetCategoryCount" parameterType="map" resultType="int">
+		SELECT
+	    	COUNT(*)
+	    FROM
+	    	ITM_ASSET_CATEGORY
+	    WHERE
+	    	GRO_IDX = #{groIdx}
+	     AND
+	      	DEL_YN = 'N'
+	    <if test="search != null and like != null and like != '' ">
+			<choose>
+				<when test="search == 'code'">
+					AND ASS_CAT_CODE LIKE CONCAT('%', #{like}, '%')
+				</when>
+				<when test="search == 'name'">
+					AND ASS_CAT_NAME LIKE CONCAT('%', #{like}, '%')
+				</when>
+				<otherwise>
+					AND (
+						ASS_CAT_CODE LIKE CONCAT('%', #{like}, '%')
+					OR ASS_CAT_NAME LIKE CONCAT('%', #{like}, '%')
+					)
+				</otherwise>
+			</choose>
+		</if>
+	</select>
+
+	<insert id="insertAssetCategory" parameterType="egovframework.itman.asset.category.service.EgovItmanAssetCategoryVO">
+		INSERT INTO
+			ITM_ASSET_CATEGORY
+			(GRO_IDX, ASS_CAT_CODE, ASS_CAT_NAME, REG_DATE, REG_IDX, SL_NOTE)
+		VALUES
+			(#{groIdx}, #{assCatCode}, #{assCatName}, now(), #{regIdx}, #{slNote})
+	</insert>
+
+	<select id="selectAssetCategoryCode" parameterType="map" resultType="string">
+		SELECT ASS_CAT_CODE
+		FROM ITM_ASSET_CATEGORY
+		WHERE GRO_IDX = #{groIdx} AND ASS_CAT_IDX = #{assCatIdx}
+	</select>
+
+	<select id="selectAssetCategory" parameterType="map" resultType="egovframework.itman.asset.category.service.EgovItmanAssetCategoryVO">
+		SELECT
+			*
+		FROM
+			ITM_ASSET_CATEGORY
+		WHERE
+			ASS_CAT_IDX = #{assCatIdx}
+		AND
+			GRO_IDX = #{groIdx}
+	</select>
+
+	<update id="updateAssetCategory" parameterType="egovframework.itman.asset.category.service.EgovItmanAssetCategoryVO">
+		UPDATE
+			ITM_ASSET_CATEGORY
+		SET
+			ASS_CAT_CODE = #{assCatCode},
+			ASS_CAT_NAME = #{assCatName},
+			SL_NOTE = #{slNote},
+			MOD_DATE = now(),
+			MOD_IDX = #{modIdx}
+		WHERE
+			ASS_CAT_IDX = #{assCatIdx}
+	</update>
+
+	<update id="deleteAssetCategory" parameterType="egovframework.itman.asset.category.service.EgovItmanAssetCategoryVO">
+		UPDATE
+			ITM_ASSET_CATEGORY
+		SET
+			DEL_YN = 'Y',
+			DEL_DATE = now(),
+			DEL_IDX = #{delIdx}
+		WHERE
+			ASS_CAT_IDX = #{assCatIdx}
+	</update>
+
+</mapper>

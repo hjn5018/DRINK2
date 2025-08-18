@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovItmanGroupDAO">
+
+	<select id="selectGroupList" parameterType="egovframework.itman.member.service.EgovItmanMemberVO" resultType="egovframework.itman.group.service.EgovItmanGroupVO">
+		SELECT
+			G.*,
+			(SELECT COUNT(*) FROM ITM_ASSET A WHERE A.GRO_IDX = G.GRO_IDX AND A.DEL_YN = 'N') AS assetCount,
+			(SELECT COUNT(*) FROM ITM_EMPLOYE E WHERE E.GRO_IDX = G.GRO_IDX AND E.DEL_YN = 'N') AS employeeCount
+		FROM 
+			ITM_GROUP G
+		WHERE
+			G.GRO_OWNER_IDX = #{memIdx}
+		AND G.DEL_YN = 'N'
+	</select>
+	
+	
+	<insert id="insertGroup" parameterType="egovframework.itman.group.service.EgovItmanGroupVO">
+	
+			INSERT INTO
+				ITM_GROUP
+				(GRO_NAME, GRO_OWNER_IDX, GRO_NOTE, GRO_IMG, REG_DATE, REG_IDX, REG_IP)
+			VALUES
+				(#{groName}, #{groOwnerIdx}, #{groNote}, #{groImg}, now(), #{groOwnerIdx}, '111.111.111.1')
+				
+	</insert>
+
+<!-- 	<select id="selectGroup" parameterType="egovframework.itman.group.service.EgovItmanGroupVO" resultType="egovframework.itman.group.service.EgovItmanGroupVO"> -->
+<!-- 	SELECT  -->
+<!-- 		G.*, -->
+<!-- 		COUNT(DISTINCT A.ASS_IDX) AS assetCount, -->
+<!-- 		COUNT(DISTINCT E.EMP_IDX) AS employeeCount, -->
+<!-- 		COUNT(DISTINCT D.DIV_IDX) AS divisionCount, -->
+<!-- 		COUNT(DISTINCT P.POS_IDX) AS positionCount, -->
+<!-- 		COUNT(DISTINCT S.SUP_IDX) AS supplierCount, -->
+<!-- 		COUNT(DISTINCT L.LOC_IDX) AS locationCount, -->
+<!-- 		COUNT(DISTINCT C.ASS_CAT_IDX) AS assetCategoryCount, -->
+<!-- 		COUNT(DISTINCT ST.STA_IDX) AS stateCount, -->
+<!-- 		COUNT(DISTINCT ES.EMP_ST_IDX) AS empStateCount -->
+		
+<!-- 	FROM  -->
+<!-- 		ITM_GROUP G -->
+<!-- 		LEFT JOIN ITM_ASSET A           ON A.GRO_IDX = G.GRO_IDX AND A.DEL_YN = 'N' -->
+<!-- 		LEFT JOIN ITM_EMPLOYE E         ON E.GRO_IDX = G.GRO_IDX AND E.DEL_YN = 'N' -->
+<!-- 		LEFT JOIN ITM_POSITION P        ON P.GRO_IDX = G.GRO_IDX AND P.DEL_YN = 'N' -->
+<!-- 		LEFT JOIN ITM_SUPPLIER S        ON S.GRO_IDX = G.GRO_IDX AND S.DEL_YN = 'N' -->
+<!-- 		LEFT JOIN ITM_LOCATION L        ON L.GRO_IDX = G.GRO_IDX AND L.DEL_YN = 'N' -->
+<!-- 		LEFT JOIN ITM_ASSET_CATEGORY C  ON C.GRO_IDX = G.GRO_IDX AND C.DEL_YN = 'N' -->
+<!-- 		LEFT JOIN ITM_STATE ST          ON ST.GRO_IDX = G.GRO_IDX AND ST.DEL_YN = 'N' -->
+<!-- 		LEFT JOIN ITM_EMP_STATE ES      ON ES.GRO_IDX = G.GRO_IDX AND ES.DEL_YN = 'N' -->
+<!-- 		LEFT JOIN ITM_DIVISION D        ON D.GRO_IDX = G.GRO_IDX AND D.DEL_YN = 'N' -->
+<!-- 	WHERE  -->
+<!-- 		G.GRO_IDX = #{groIdx} -->
+<!-- 		AND G.DEL_YN = 'N' -->
+<!-- 	GROUP BY  -->
+<!-- 		G.GRO_IDX -->
+<!-- </select> -->
+
+<select id="selectGroup"
+        parameterType="egovframework.itman.group.service.EgovItmanGroupVO"
+        resultType="egovframework.itman.group.service.EgovItmanGroupVO">
+    SELECT
+        G.*,
+        A.assetCount,
+        E.employeeCount,
+        D.divisionCount,
+        P.positionCount,
+        S.supplierCount,
+        L.locationCount,
+        C.assetCategoryCount,
+        ST.stateCount,
+        ES.empStateCount
+    FROM ITM_GROUP G
+    /* 각 테이블을 groIdx로 미리 집계해 붙인다 (DISTINCT 불필요) */
+    LEFT JOIN (
+        SELECT GRO_IDX, COUNT(*) AS assetCount
+        FROM ITM_ASSET
+        WHERE DEL_YN = 'N' AND GRO_IDX = #{groIdx}
+        GROUP BY GRO_IDX
+    ) A  ON A.GRO_IDX = G.GRO_IDX
+
+    LEFT JOIN (
+        SELECT GRO_IDX, COUNT(*) AS employeeCount
+        FROM ITM_EMPLOYE
+        WHERE DEL_YN = 'N' AND GRO_IDX = #{groIdx}
+        GROUP BY GRO_IDX
+    ) E  ON E.GRO_IDX = G.GRO_IDX
+
+    LEFT JOIN (
+        SELECT GRO_IDX, COUNT(*) AS divisionCount
+        FROM ITM_DIVISION
+        WHERE DEL_YN = 'N' AND GRO_IDX = #{groIdx}
+        GROUP BY GRO_IDX
+    ) D  ON D.GRO_IDX = G.GRO_IDX
+
+    LEFT JOIN (
+        SELECT GRO_IDX, COUNT(*) AS positionCount
+        FROM ITM_POSITION
+        WHERE DEL_YN = 'N' AND GRO_IDX = #{groIdx}
+        GROUP BY GRO_IDX
+    ) P  ON P.GRO_IDX = G.GRO_IDX
+
+    LEFT JOIN (
+        SELECT GRO_IDX, COUNT(*) AS supplierCount
+        FROM ITM_SUPPLIER
+        WHERE DEL_YN = 'N' AND GRO_IDX = #{groIdx}
+        GROUP BY GRO_IDX
+    ) S  ON S.GRO_IDX = G.GRO_IDX
+
+    LEFT JOIN (
+        SELECT GRO_IDX, COUNT(*) AS locationCount
+        FROM ITM_LOCATION
+        WHERE DEL_YN = 'N' AND GRO_IDX = #{groIdx}
+        GROUP BY GRO_IDX
+    ) L  ON L.GRO_IDX = G.GRO_IDX
+
+    LEFT JOIN (
+        SELECT GRO_IDX, COUNT(*) AS assetCategoryCount
+        FROM ITM_ASSET_CATEGORY
+        WHERE DEL_YN = 'N' AND GRO_IDX = #{groIdx}
+        GROUP BY GRO_IDX
+    ) C  ON C.GRO_IDX = G.GRO_IDX
+
+    LEFT JOIN (
+        SELECT GRO_IDX, COUNT(*) AS stateCount
+        FROM ITM_STATE
+        WHERE DEL_YN = 'N' AND GRO_IDX = #{groIdx}
+        GROUP BY GRO_IDX
+    ) ST ON ST.GRO_IDX = G.GRO_IDX
+
+    LEFT JOIN (
+        SELECT GRO_IDX, COUNT(*) AS empStateCount
+        FROM ITM_EMP_STATE
+        WHERE DEL_YN = 'N' AND GRO_IDX = #{groIdx}
+        GROUP BY GRO_IDX
+    ) ES ON ES.GRO_IDX = G.GRO_IDX
+
+    WHERE G.GRO_IDX = #{groIdx}
+      AND G.DEL_YN = 'N'
+</select>
+
+
+
+
+	
+</mapper>

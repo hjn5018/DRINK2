@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovItmanAssetLogDAO">
+
+	<resultMap id="assetLogResultMap"
+		type="egovframework.itman.asset.log.service.EgovItmanAssetLogVO">
+		<result property="alIdx" column="AL_IDX" />
+		<result property="assNameLog" column="ASS_NAME_LOG" />
+		<result property="assIdx" column="ASS_IDX" />
+		<result property="alType" column="AL_TYPE" />
+		<result property="alCat" column="AL_CAT" />
+		<result property="alCont" column="AL_CONT" />
+		<result property="alNote" column="AL_NOTE" />
+		<result property="regDate" column="REG_DATE" />
+		<result property="regIdx" column="REG_IDX" />
+		<result property="regIp" column="REG_IP" />
+		<association property="egovItmanMemberVO"
+			javaType="egovframework.itman.member.service.EgovItmanMemberVO">
+			<result property="memIdx" column="MEM_IDX" />
+			<result property="memName" column="MEM_NAME" />
+		</association>
+		<association property="egovItmanAssetVO"
+			javaType="egovframework.itman.asset.service.EgovItmanAssetVO">
+			<result property="assIdx" column="ASS_IDX" />
+			<result property="assUlid" column="ASS_ULID" />
+			<result property="assName" column="ASS_NAME" />
+		</association>
+	</resultMap>
+
+	<insert id="insertAssetLog" parameterType="egovframework.itman.asset.log.service.EgovItmanAssetLogVO">
+		INSERT INTO ITM_ASS_LOG
+			(ASS_IDX, ASS_NAME_LOG, AL_TYPE, AL_CAT, REG_DATE, REG_IDX, REG_IP)
+		VALUES
+			(#{assIdx}, #{assNameLog}, #{alType}, #{alCat}, now(), #{regIdx}, #{regIp})
+	</insert>
+
+	<select id="selectAssetLogList" parameterType="egovframework.itman.asset.log.service.EgovItmanAssetLogVO" resultMap="assetLogResultMap">
+		SELECT
+			log.*, asset.ASS_ULID, asset.ASS_NAME, member.MEM_IDX, member.MEM_NAME
+		FROM
+			ITM_ASS_LOG log
+		LEFT JOIN ITM_ASSET asset ON log.ASS_IDX = asset.ASS_IDX
+		LEFT JOIN ITM_MEMBER member ON log.REG_IDX = member.MEM_IDX
+		WHERE
+			asset.GRO_IDX = #{groIdx}
+		<if test="searchCondition != null and searchCondition != '' and searchKeyword != null and searchKeyword != ''">
+			<choose>
+				<when test="searchCondition == 'all'">
+					AND (
+						asset.ASS_ULID LIKE CONCAT('%', #{searchKeyword}, '%')
+						OR log.ASS_NAME_LOG LIKE CONCAT('%', #{searchKeyword}, '%')
+						OR log.AL_CONT LIKE CONCAT('%', #{searchKeyword}, '%')
+						OR log.AL_NOTE LIKE CONCAT('%', #{searchKeyword}, '%')
+					)
+				</when>
+				<when test="searchCondition == 'ulid'">
+					AND asset.ASS_ULID LIKE CONCAT('%', #{searchKeyword}, '%')
+				</when>
+				<when test="searchCondition == 'name'">
+					AND log.ASS_NAME_LOG LIKE CONCAT('%', #{searchKeyword}, '%')
+				</when>
+				<when test="searchCondition == 'content'">
+					AND log.AL_CONT LIKE CONCAT('%', #{searchKeyword}, '%')
+				</when>
+				<when test="searchCondition == 'note'">
+					AND log.AL_NOTE LIKE CONCAT('%', #{searchKeyword}, '%')
+				</when>
+			</choose>
+		</if>
+		    <choose>
+        <when test="orderBy == 'regDate_desc'">
+            ORDER BY log.REG_DATE DESC
+        </when>
+        <when test="orderBy == 'regDate_asc'">
+            ORDER BY log.REG_DATE ASC
+        </when>
+        <otherwise>
+            ORDER BY log.REG_DATE DESC
+        </otherwise>
+    </choose>
+		LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+	</select>
+
+	<select id="selectAssetLogListTotCnt" parameterType="egovframework.itman.asset.log.service.EgovItmanAssetLogVO" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			ITM_ASS_LOG log
+		LEFT JOIN ITM_ASSET asset ON log.ASS_IDX = asset.ASS_IDX
+		WHERE
+			asset.GRO_IDX = #{groIdx}
+		<if test="searchCondition != null and searchCondition != '' and searchKeyword != null and searchKeyword != ''">
+			<choose>
+				<when test="searchCondition == 'all'">
+					AND (
+						asset.ASS_ULID LIKE CONCAT('%', #{searchKeyword}, '%')
+						OR log.ASS_NAME_LOG LIKE CONCAT('%', #{searchKeyword}, '%')
+						OR log.AL_CONT LIKE CONCAT('%', #{searchKeyword}, '%')
+						OR log.AL_NOTE LIKE CONCAT('%', #{searchKeyword}, '%')
+					)
+				</when>
+				<when test="searchCondition == 'ulid'">
+					AND asset.ASS_ULID LIKE CONCAT('%', #{searchKeyword}, '%')
+				</when>
+				<when test="searchCondition == 'name'">
+					AND log.ASS_NAME_LOG LIKE CONCAT('%', #{searchKeyword}, '%')
+				</when>
+				<when test="searchCondition == 'content'">
+					AND log.AL_CONT LIKE CONCAT('%', #{searchKeyword}, '%')
+				</when>
+				<when test="searchCondition == 'note'">
+					AND log.AL_NOTE LIKE CONCAT('%', #{searchKeyword}, '%')
+				</when>
+			</choose>
+		</if>
+	</select>
+
+	<select id="selectAssetLogListByAssIdx" parameterType="string" resultMap="assetLogResultMap">
+		SELECT
+			log.*, asset.ASS_ULID, asset.ASS_NAME, member.MEM_IDX, member.MEM_NAME
+		FROM ITM_ASS_LOG log
+		LEFT JOIN ITM_ASSET asset ON log.ASS_IDX = asset.ASS_IDX
+		LEFT JOIN ITM_MEMBER member ON log.REG_IDX = member.MEM_IDX
+		WHERE log.ASS_IDX = #{assIdx}
+		ORDER BY AL_IDX DESC
+	</select>
+
+</mapper> 

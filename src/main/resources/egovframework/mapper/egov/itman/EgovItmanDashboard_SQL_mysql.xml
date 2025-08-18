@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovItmanDashboardDAO">
+	<select id="selectAssetStateList"
+		parameterType="egovframework.itman.group.service.EgovItmanGroupVO"
+		resultType="egovframework.itman.state.service.EgovItmanStateVO">
+
+		SELECT
+			*, (SELECT COUNT(*) FROM ITM_ASSET WHERE GRO_IDX = #{groIdx} and STA_IDX = ITS.STA_IDX and DEL_YN = 'N') as STA_CNT
+		FROM
+			ITM_STATE ITS
+		WHERE
+			GRO_IDX = #{groIdx}
+		AND DEL_YN = 'N'
+
+	</select>
+
+	<resultMap id="assetLogResultMap"
+		type="egovframework.itman.asset.log.service.EgovItmanAssetLogVO">
+		<result property="alIdx" column="AL_IDX" />
+		<result property="assNameLog" column="ASS_NAME_LOG" />
+		<result property="assIdx" column="ASS_IDX" />
+		<result property="alType" column="AL_TYPE" />
+		<result property="alCat" column="AL_CAT" />
+		<result property="alCont" column="AL_CONT" />
+		<result property="alNote" column="AL_NOTE" />
+		<result property="regDate" column="REG_DATE" />
+		<result property="regIdx" column="REG_IDX" />
+		<result property="regIp" column="REG_IP" />
+		<association property="egovItmanMemberVO"
+			javaType="egovframework.itman.member.service.EgovItmanMemberVO">
+			<result property="memIdx" column="MEM_IDX" />
+			<result property="memName" column="MEM_NAME" />
+			<result property="memMail" column="MEM_MAIL" />
+			<result property="memPw" column="MEM_PW" />
+			<result property="memTel" column="MEM_TEL" />
+			<result property="regDate" column="REG_DATE" />
+			<result property="modDate" column="MOD_DATE" />
+			<result property="delYn" column="DEL_YN" />
+			<result property="delDate" column="DEL_DATE" />
+		</association>
+
+		<association property="egovItmanAssetVO"
+			javaType="egovframework.itman.asset.service.EgovItmanAssetVO">
+			<result property="assIdx" column="ASS_IDX" />
+			<result property="groIdx" column="GRO_IDX" />
+			<result property="assUlid" column="ASS_ULID" />
+			<result property="assName" column="ASS_NAME" />
+			<result property="assCatIdx" column="ASS_CAT_IDX" />
+			<result property="staIdx" column="STA_IDX" />
+			<result property="locIdx" column="LOC_IDX" />
+			<result property="empIdx" column="EMP_IDX" />
+			<result property="supIdx" column="SUP_IDX" />
+			<result property="buyDate" column="BUY_DATE" />
+			<result property="price" column="PRICE" />
+			<result property="regDate" column="REG_DATE" />
+			<result property="regIdx" column="REG_IDX" />
+			<result property="modDate" column="MOD_DATE" />
+			<result property="modIdx" column="MOD_IDX" />
+			<result property="image" column="IMAGE" />
+			<result property="delYn" column="DEL_YN" />
+			<result property="uuid" column="UUID" />
+		</association>
+	</resultMap>
+
+	<select id="selectAssetLogList"
+		parameterType="egovframework.itman.group.service.EgovItmanGroupVO"
+		resultMap="assetLogResultMap">
+		SELECT
+			*
+		FROM
+			ITM_ASS_LOG log
+		LEFT JOIN
+			ITM_ASSET asset ON log.ASS_IDX = asset.ASS_IDX
+		LEFT JOIN
+			ITM_MEMBER member ON log.REG_IDX = member.MEM_IDX
+		WHERE
+			asset.GRO_IDX = #{groIdx}
+		ORDER BY
+			AL_IDX DESC
+		limit
+			0, 10
+	</select>
+</mapper>

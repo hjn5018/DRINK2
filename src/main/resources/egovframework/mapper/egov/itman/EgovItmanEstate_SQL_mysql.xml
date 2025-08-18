@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovItmanEstateDAO">
+
+	<sql id="commonWhere">
+		WHERE
+		IES.GRO_IDX = #{groIdx}
+		AND IES.DEL_YN = 'N'
+		<if test="searchKeyword != null and searchKeyword != ''">
+			<choose>
+				<when test="searchCondition == 'all'">
+					AND (IES.EMP_ST_NAME LIKE CONCAT('%',
+					#{searchKeyword}, '%') OR
+					IES.SL_NOTE LIKE CONCAT('%',
+					#{searchKeyword}, '%'))
+				</when>
+				<when test="searchCondition == 'name'">
+					AND IES.EMP_ST_NAME LIKE CONCAT('%',
+					#{searchKeyword}, '%')
+				</when>
+				<when test="searchCondition == 'note'">
+					AND IES.SL_NOTE LIKE CONCAT('%', #{searchKeyword},
+					'%')
+				</when>
+			</choose>
+		</if>
+	</sql>
+
+	<select id="selectEstateList"
+		parameterType="egovframework.itman.Estate.service.EgovItmanEstateSearchVO"
+		resultType="egovframework.itman.Estate.service.EgovItmanEstateVO">
+		SELECT
+		IES.EMP_ST_IDX AS stIdx,
+		IES.EMP_ST_NAME AS stName,
+		IES.SL_NOTE AS
+		slNote,
+		(SELECT COUNT(*)
+		FROM ITM_EMPLOYE EMP
+		WHERE EMP.GRO_IDX =
+		IES.GRO_IDX
+		AND EMP.EMP_ST_IDX = IES.EMP_ST_IDX
+		AND EMP.DEL_YN = 'N') AS
+		empCnt
+		FROM
+		ITM_EMP_STATE IES
+		<include refid="commonWhere" />
+		ORDER BY IES.EMP_ST_IDX DESC
+		LIMIT #{firstIndex}, #{recordCountPerPage}
+	</select>
+
+	<select id="selectStateListTotCnt"
+		parameterType="egovframework.itman.Estate.service.EgovItmanEstateSearchVO"
+		resultType="int">
+		SELECT COUNT(*)
+		FROM ITM_EMP_STATE IES
+		<include refid="commonWhere" />
+	</select>
+
+	<select id="selectStateDetail" parameterType="String"
+		resultType="egovframework.itman.Estate.service.EgovItmanEstateVO">
+		SELECT
+		EMP_ST_IDX AS stIdx,
+		GRO_IDX AS groIdx,
+		EMP_ST_NAME AS
+		stName,
+		EMP_ST_CODE AS stCode,
+		EMP_ST_YN AS stYn,
+		SL_NOTE AS slNote,
+		DEL_YN AS delYn
+		FROM ITM_EMP_STATE
+		WHERE
+		EMP_ST_IDX = #{stIdx}
+		AND DEL_YN
+		= 'N'
+	</select>
+
+	<insert id="insertEstate"
+		parameterType="egovframework.itman.Estate.service.EgovItmanEstateVO">
+		INSERT INTO ITM_EMP_STATE (
+		GRO_IDX, EMP_ST_NAME,
+		EMP_ST_CODE, SL_NOTE, EMP_ST_YN, DEL_YN, REG_IDX,
+		REG_DATE
+		) VALUES (
+		#{groIdx}, #{stName}, #{stCode}, #{slNote}, 'Y', 'N', #{regIdx}, NOW()
+		)
+	</insert>
+
+	<update id="updateEstate"
+		parameterType="egovframework.itman.Estate.service.EgovItmanEstateVO">
+		UPDATE ITM_EMP_STATE
+		SET
+		EMP_ST_NAME = #{stName},
+		EMP_ST_CODE = #{stCode},
+		SL_NOTE = #{slNote},
+<!-- 		EMP_ST_YN = #{stYn}, -->
+		MOD_IDX = #{updIdx},
+		MOD_DATE = NOW()
+		WHERE
+		EMP_ST_IDX = #{stIdx}
+	</update>
+
+	<update id="deleteEstate"
+		parameterType="egovframework.itman.Estate.service.EgovItmanEstateVO">
+		UPDATE ITM_EMP_STATE
+		SET
+		DEL_YN = 'Y',
+		DEL_IDX = #{delIdx},
+		DEL_DATE = NOW()
+		WHERE
+		EMP_ST_IDX = #{stIdx}
+	</update>
+
+	<select id="checkDuplicateStateCode"
+		parameterType="egovframework.itman.Estate.service.EgovItmanEstateVO"
+		resultType="int">
+		SELECT COUNT(*)
+		FROM ITM_EMP_STATE
+		WHERE
+		GRO_IDX = #{groIdx}
+		AND EMP_ST_CODE = #{stCode}
+		AND EMP_ST_IDX != #{stIdx}
+	</select>
+	
+</mapper>
