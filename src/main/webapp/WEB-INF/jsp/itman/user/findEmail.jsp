@@ -9,8 +9,8 @@
 	<div id="contents">
 		<div class="user_box join">
 			<p class="tit">
-				<a href="${pageContext.request.contextPath}/index.do">
-          			<img src="${pageContext.request.contextPath}/itman_static/_img/itman_logo.png" alt="아이티맨"/>
+				<a href="<c:url value='/index.do'/>">
+          			<img src="<c:url value='/itman_static/_img/itman_logo.png"'/> alt="아이티맨"/>
         		</a></p>
 			<p class="find_tit">
 				이메일을<br/>잊으셨나요?
@@ -36,21 +36,10 @@
 					</div>
 				</li>
 			</ul>
-			<p class="user_btn"><a href="javascript:fn_submit();">이메일 찾기</a></p>
+			<p class="user_btn"><a href="#" onclick="frm.submit(); return false;">이메일 찾기</a></p>
             </form>
 		</div>
 	</div>
 	<%@ include file="/WEB-INF/jsp/itman/_inc/footer.jsp" %>
 </body>
-<script>
-    function fn_submit() {
-        document.getElementById("frm").submit();  // ← frm 변수를 명확히 지정
-    }
-</script>
-
-<c:if test="${param.error eq 'Y'}">
-    <script>
-        alert('입력한 정보의 회원이 존재하지 않습니다.');
-    </script>
-</c:if>
 </html>

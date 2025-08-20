@@ -56,6 +56,7 @@ public class EgovItmanAuthProcController {
         // 2) 서비스 호출: 인증번호 생성 → DB INSERT → 메일 전송
         EgovitmanEmailCodeVO procVO = egovItmanAuthProcService.sendEmailCode(vo, mode);
 
+        // joinProc.do에서 가입을 위한 정보를 session에 보관한다.
         session.setAttribute("memName", vo.getMemName());
         session.setAttribute("memMail", vo.getMemMail());
     	session.setAttribute("memTel", vo.getMemTel());
@@ -100,18 +101,6 @@ public class EgovItmanAuthProcController {
             HttpSession session
             ) {
 		
-		String memName = (String) session.getAttribute("memName"); 
-		String memMail = (String) session.getAttribute("memMail");
-		String hashedMemPw = (String) session.getAttribute("hashedMemPw");
-		String memTel = (String) session.getAttribute("memTel");
-		
-		vo.setMemName(memName);
-		vo.setMemMail(memMail);
-		vo.setMemPw(hashedMemPw);
-		vo.setMemTel(memTel);
-		
-		session.removeAttribute(hashedMemPw);
-		
 		String mode = (String) session.getAttribute("mode");
 		String ecNum = (String) session.getAttribute("ecNum");
 		String regDate = (String) session.getAttribute("regDate");
@@ -130,10 +119,27 @@ public class EgovItmanAuthProcController {
 	        	return alertMove(model, "인증 유효 시간이 초과되었습니다.", "/user/verifyEmailCode.do");
 	        }
 	        
-			vo.setMemPw(hashedMemPw);
+			// sendEmailProc.do에서 session에 저장한 회원 정보를 불러온다.
+			String memName = (String) session.getAttribute("memName"); 
+			String memMail = (String) session.getAttribute("memMail");
+			String hashedMemPw = (String) session.getAttribute("hashedMemPw");
+			String memTel = (String) session.getAttribute("memTel");
 			
-			// 가입 로직
+			// insertUser service를 위해 vo를 설정한다.
+			vo.setMemName(memName);
+			vo.setMemMail(memMail);
+			vo.setMemPw(hashedMemPw);
+			vo.setMemTel(memTel);
+			
+			// 회원가입
 			int result = egovItmanAuthProcService.insertUser(vo);
+			
+			// 사용한 정보를 초기화한다.
+			session.removeAttribute("memName");
+			session.removeAttribute("memMail");
+			session.removeAttribute("hashedMemPw");
+			session.removeAttribute("memTel");
+			
 			if(result > 0) {
 				rdab.addFlashAttribute("memName", vo.getMemName());
 				return "redirect:/user/join03.do"; // 가입 성공
@@ -155,8 +161,6 @@ public class EgovItmanAuthProcController {
 		
 		EgovItmanMemberVO vo = egovItmanAuthProcService.loginProc(memMail, memPw);
 		if(vo != null) {
-			session.setAttribute("memMail", vo.getMemMail());
-			session.setAttribute("memPW", vo.getMemPw());
 			session.setAttribute("memIdx", vo.getMemIdx());
 			session.setAttribute("memName", vo.getMemName());
 			return "redirect:/index.do";
@@ -177,24 +181,26 @@ public class EgovItmanAuthProcController {
 			@RequestParam(value="userPhone1") String p1,
             @RequestParam(value="userPhone2") String p2,
             @RequestParam(value="userPhone3") String p3,
-            RedirectAttributes rdab) {
+            RedirectAttributes rdab,
+            Model model
+			) {
 		
 		String memTel = (p1 + p2 + p3);
 		EgovItmanMemberVO vo = egovItmanAuthProcService.findEmail(memName, memTel);
 		
 		if(vo != null) {
 			rdab.addFlashAttribute("memMail", vo.getMemMail());
-			return "redirect:/user/compEmail.do";
+			return "redirect:/user/compEmail.do"; // 회원 조회 성공.
 		} else {
-			return "redirect:/user/findEmail.do?error=Y";
+			return alertMove(model, "입력한 정보의 회원이 존재하지 않습니다.", "/user/findEmail.do"); // 회원 조회 실패.
 		}
 	}
 	
 	@RequestMapping("/user/findPassProc.do")
 	public String findPassProc(
-			@RequestParam("mode") String mode,
 			@RequestParam(value="memName") String memName,
 			@RequestParam(value="memMail") String memMail,
+			@RequestParam("mode") String mode,
 			@RequestParam(value="userPhone1") String p1,
             @RequestParam(value="userPhone2") String p2,
             @RequestParam(value="userPhone3") String p3,
@@ -203,13 +209,13 @@ public class EgovItmanAuthProcController {
             HttpSession session) {
 		
 		String memTel = (p1 + p2 + p3);
-		EgovItmanMemberVO vo = egovItmanAuthProcService.findPass(memName, memMail, memTel);
+		EgovItmanMemberVO vo = egovItmanAuthProcService.findMemIdx(memName, memMail, memTel);
 		
 		if(vo != null) {
 			rdab.addAttribute("memName", memName);
 			rdab.addAttribute("memMail", memMail);
+			rdab.addAttribute("memTel", memTel);
 			rdab.addAttribute("mode", mode);
-			session.setAttribute("memIdx", vo.getMemIdx());
 			
 			return "redirect:/user/sendEmailProc.do";
 		} else {
@@ -229,14 +235,26 @@ public class EgovItmanAuthProcController {
 			return alertMove(model, "비밀번호가 일치하지 않습니다!", "/user/changePassword.do");
 		}
 		
-		String memIdx = (String) session.getAttribute("memIdx");
+		String memName = (String) session.getAttribute("memName");
+		String memMail = (String) session.getAttribute("memMail");
+		String memTel = (String) session.getAttribute("memTel");
+		EgovItmanMemberVO resultVO = egovItmanAuthProcService.findMemIdx(memName, memMail, memTel);
+		String memIdx = resultVO.getMemIdx();
 		EgovItmanMemberVO vo = egovItmanAuthProcService.selectUserByIdx(memIdx);
 		String beforeMemPw = vo.getMemPw();
 		if(pEncoder.matches(memPw, beforeMemPw)) {
 			return alertMove(model, "기존 비밀번호와 같은 비밀번호는 사용할 수 없습니다.", "/user/changePassword.do");
 		}
+		
 		String hash = pEncoder.encode(memPw);
 		int result = egovItmanAuthProcService.updateUserPw(memIdx, hash);
+		
+		session.removeAttribute("memName");
+		session.removeAttribute("memMail");
+		session.removeAttribute("memTel");
+		session.removeAttribute("mode");
+		session.removeAttribute("ecNum");
+		session.removeAttribute("regDate");
 		
 		if(result > 0) {
 			return alertMove(model, "비밀번호 변경이 완료되었습니다.", "/user/login.do");

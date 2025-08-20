@@ -13,7 +13,7 @@ public class EgovItmanController {
     public String index(HttpSession hsession, Model model) {
     	
 		// 로그인 시 저장한 memMail을 토대로 isLogin을 확인한다.
-    	boolean isLogin = hsession.getAttribute("memMail") != null;
+    	boolean isLogin = hsession.getAttribute("memIdx") != null;
     	model.addAttribute("isLogin", isLogin);
     	
     	// isLogin이면 memName을 반환한다.

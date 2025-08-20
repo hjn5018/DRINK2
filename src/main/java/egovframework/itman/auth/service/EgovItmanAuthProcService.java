@@ -14,7 +14,7 @@ public interface EgovItmanAuthProcService {
 
 	EgovItmanMemberVO findEmail(String memName, String memTel);
 
-	EgovItmanMemberVO findPass(String memName, String memMail, String memTel);
+	EgovItmanMemberVO findMemIdx(String memName, String memMail, String memTel);
 
 	EgovItmanMemberVO selectUserByIdx(String memMail);
 

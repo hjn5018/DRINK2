@@ -8,6 +8,12 @@
   <title>로그인</title>
 </head>
 <body>
+<%-- 
+로그인 진행 순서
+login.do ->
+loginProc.do ->
+index.do
+ --%>
   <div id="contents">
     <div class="user_box">
       <p class="tit">

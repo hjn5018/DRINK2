@@ -13,7 +13,7 @@ join01.do: 약관 ->
 join02.do: 정보 입력 ->
 sendEmailProc.do: 이메일 전송 (session에 회원 정보 set) ->
 verifyEmailCode.do: 인증번호 ->
-joinProc.do: 가입 (session의 hashedMemPw를 remove) ->
+joinProc.do: 가입 (session의 회원 정보 remove) ->
 join03.do: 환영  
 --%>
 	<div id="contents">

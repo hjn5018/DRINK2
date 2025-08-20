@@ -34,12 +34,12 @@ public class EgovItmanAuthProcServiceDAO extends EgovAbstractMapper{
 		return selectOne("findEmail", vo);
 	}
 
-	public EgovItmanMemberVO findPass(String memName, String memMail, String memTel) {
+	public EgovItmanMemberVO findMemIdx(String memName, String memMail, String memTel) {
 		EgovItmanMemberVO vo = new EgovItmanMemberVO();
 		vo.setMemName(memName);
 		vo.setMemMail(memMail);
 		vo.setMemTel(memTel);
-		return selectOne("findPass", vo);
+		return selectOne("findMemIdx", vo);
 	}
 
 	public EgovItmanMemberVO selectUserByIdx(String memMail) {

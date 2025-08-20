@@ -36,7 +36,7 @@
 			AND MEM_TEL = #{memTel}
 			AND DEL_YN = 'N'
 	</select>
-	<select id="findPass" resultType="egovframework.itman.member.service.EgovItmanMemberVO">
+	<select id="findMemIdx" resultType="egovframework.itman.member.service.EgovItmanMemberVO">
 		SELECT
 			MEM_IDX
 		FROM

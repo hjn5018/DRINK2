@@ -57,11 +57,7 @@
 									<option value="010">010</option>
 									<option value="011">011</option>
 									<option value="012">012</option>
-								</select>
-								<span>&#8209;</span>
-								<input type="tel" id="userPhone2" name="userPhone2" />
-								<span>&#8209;</span>
-								<input type="tel" id="userPhone3" name="userPhone3" />
+								</select><span>&#8209;</span><input type="tel" id="userPhone2" name="userPhone2" /><span>&#8209;</span><input type="tel" id="userPhone3" name="userPhone3" />
 							</p>
 						</div>
 					</li>

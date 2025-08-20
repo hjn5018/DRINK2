@@ -88,8 +88,8 @@ public class EgovItmanAuthProcServiceImpl implements EgovItmanAuthProcService{
 	}
 
 	@Override
-	public EgovItmanMemberVO findPass(String memName, String memMail, String memTel) {
-		return egovItmanLoginProcServiceDAO.findPass(memName, memMail, memTel);
+	public EgovItmanMemberVO findMemIdx(String memName, String memMail, String memTel) {
+		return egovItmanLoginProcServiceDAO.findMemIdx(memName, memMail, memTel);
 	}
 
 	@Override

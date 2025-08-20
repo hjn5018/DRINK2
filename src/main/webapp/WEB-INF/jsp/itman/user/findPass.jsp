@@ -9,12 +9,12 @@
 </head>
 <body>
 <%--
-findPass.do: 회원정보 입력 ->
-findPassProc.do: 기존 회원 여부 확인 ->
-sendEmailProc.do: 이메일 전송 (session에 회원 정보 set)->
-verifyEmailCode.do: 인증번호 검증 ->
-changePassword.do: 변경할 비밀번호 입력 ->
-changePasswordProc.do: 비밀번호 변경
+findPass.do: 회원정보 입력 : (form) memName, memMail, userPhone123, mode ->
+findPassProc.do: 기존 회원 여부 확인 : findMemIdx(), memName, memMail, memTel, mode ->
+sendEmailProc.do: 이메일 전송 (session에 회원 정보 set): sendEmailCode(), (session) memName, memMail, memTel, mode, ecNum, regDate ->
+verifyEmailCode.do: 인증번호 검증: verCode ->
+changePassword.do: 변경할 비밀번호 입력: (form) memPw, memPwCh ->
+changePasswordProc.do: 비밀번호 변경 (session의 회원 정보 remove)
  --%>
 	<div id="contents">
 		<div class="user_box join">
@@ -51,10 +51,7 @@ changePasswordProc.do: 비밀번호 변경
 									<option>010</option>
 									<option>011</option>
 									<option>012</option>
-								</select>
-								<span>-</span>
-								<input type="tel" id="userPhone2" name="userPhone2">
-								<span>-</span><input type="tel" id="userPhone3" name="userPhone3">
+								</select><span>-</span><input type="tel" id="userPhone2" name="userPhone2"><span>-</span><input type="tel" id="userPhone3" name="userPhone3">
 							</p>
 						</div>
 					</li>
