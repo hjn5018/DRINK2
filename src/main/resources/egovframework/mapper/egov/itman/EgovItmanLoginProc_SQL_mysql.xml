@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovItmanLoginProcServiceDAO">
+	<select id="isEmailExists" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			ITM_MEMBER
+		WHERE
+			MEM_MAIL = #{email}
+		AND DEL_YN = 'N'
+	</select>
+	<insert id="insertEmailCode">
+		INSERT INTO ITM_EMAIL_CODE
+			(EMAIL, MEM_NAME, EC_NUM, EC_MODE, REG_DATE)
+			VALUES
+			(#{email}, #{memName}, #{ecNum}, #{ecMode}, #{regDate})
+	</insert>
+	<insert id="insertUser" parameterType="egovframework.itman.member.service.EgovItmanMemberVO">
+		INSERT INTO ITM_MEMBER
+			(MEM_NAME, MEM_MAIL, MEM_PW, MEM_TEL, REG_DATE)
+			VALUES
+			(#{memName}, #{memMail}, #{memPw}, #{memTel}, NOW());
+	</insert>
+<!-- loginProc -->
+	<select id="selectUser" parameterType="String" resultType="egovframework.itman.member.service.EgovItmanMemberVO">
+		SELECT MEM_IDX, MEM_MAIL, MEM_PW, MEM_NAME
+		FROM ITM_MEMBER
+		WHERE MEM_MAIL = #{memMail}
+			AND DEL_YN = 'N'
+	</select>
+	<select id="findEmail" resultType="egovframework.itman.member.service.EgovItmanMemberVO">
+		SELECT MEM_MAIL FROM ITM_MEMBER
+		WHERE MEM_NAME = #{memName}
+			AND MEM_TEL = #{memTel}
+			AND DEL_YN = 'N'
+	</select>
+	<select id="findMemIdx" resultType="egovframework.itman.member.service.EgovItmanMemberVO">
+		SELECT
+			MEM_IDX
+		FROM
+			ITM_MEMBER
+		WHERE
+			MEM_NAME = #{memName}
+			AND MEM_MAIL = #{memMail}
+			AND MEM_TEL = #{memTel}
+			AND DEL_YN = 'N'
+	</select>
+	<select id="selectUserByIdx" parameterType="string" resultType="egovframework.itman.member.service.EgovItmanMemberVO">
+        SELECT * FROM ITM_MEMBER
+        WHERE MEM_IDX = #{memIdx}
+          AND DEL_YN = 'N'
+    </select>
+    <update id="updateUserPw" parameterType="egovframework.itman.member.service.EgovItmanMemberVO">
+        UPDATE 
+        	ITM_MEMBER
+        SET 
+        	MEM_PW = #{memPw},
+        	MOD_DATE = now()
+        WHERE 
+        	MEM_IDX = #{memIdx}
+    </update>
+    <select id="mypageSelectUser" parameterType="string" resultType="egovframework.itman.member.service.EgovItmanMemberVO">
+        SELECT MEM_IDX AS memIdx,
+               MEM_NAME AS memName,
+               MEM_MAIL AS memMail,
+               MEM_TEL AS memTel
+        		FROM ITM_MEMBER
+        WHERE MEM_IDX = #{memIdx}
+    </select>
+
+</mapper>

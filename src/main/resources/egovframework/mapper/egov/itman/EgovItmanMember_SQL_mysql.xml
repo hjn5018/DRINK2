@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovItmanMemberDAO">
+	<select id="selectMember" parameterType="egovframework.itman.member.service.EgovItmanMemberVO" resultType="egovframework.itman.member.service.EgovItmanMemberVO">
+	
+			SELECT
+				* 
+			FROM 
+				ITM_MEMBER
+			WHERE
+				MEM_IDX = #{memIdx}
+			AND DEL_YN = 'N'
+				
+
+	</select>
+	<select id="selectPhoneNumber" parameterType="egovframework.itman.member.service.EgovItmanMemberVO" resultType="egovframework.itman.member.service.EgovItmanMemberVO">
+			SELECT
+				MEM_TEL 
+			FROM 
+				ITM_MEMBER
+			WHERE
+				MEM_IDX = #{memIdx}
+			AND DEL_YN = 'N'
+	</select>
+	<update id="updateMemTel" parameterType="egovframework.itman.member.service.EgovItmanMemberVO">
+		UPDATE 
+			ITM_MEMBER
+    	SET 
+    		MEM_TEL = #{memTel},
+    		MOD_DATE = now()
+    	WHERE 
+    		MEM_IDX = #{memIdx}
+	</update>
+	<update id="updateDelYn" parameterType="egovframework.itman.member.service.EgovItmanMemberVO">
+		UPDATE 
+			ITM_MEMBER
+    	SET 
+    		DEL_YN = 'Y',
+    		DEL_DATE = now()
+    	WHERE 
+    		MEM_IDX = #{memIdx}
+	</update>
+	<select id="selectGroupByIdx" parameterType="egovframework.itman.group.service.EgovItmanGroupVO" resultType="egovframework.itman.group.service.EgovItmanGroupVO">
+		SELECT
+			* 
+		FROM 
+			ITM_GROUP
+		WHERE
+			GRO_IDX = #{groIdx}
+		AND 
+			DEL_YN = 'N'
+	</select>
+	<update id="updateGroup" parameterType="egovframework.itman.group.service.EgovItmanGroupVO">
+		UPDATE
+			ITM_GROUP
+        SET  
+         	GRO_NAME = #{groName}, GRO_NOTE = #{groNote}, GRO_IMG = #{groImg}, MOD_IDX = #{regIdx}, MOD_DATE = now(),  MOD_IP = #{modIp}
+		WHERE 
+			GRO_IDX = #{groIdx}
+	</update>
+	<update id="updateGroupDelYn" parameterType="egovframework.itman.group.service.EgovItmanGroupVO">
+    UPDATE 
+    	ITM_GROUP 
+    SET 
+    	DEL_YN = 'Y', DEL_IDX = #{delIdx}, DEL_DATE = NOW(), DEL_IP = #{delIp} 
+    WHERE 
+    	GRO_IDX = #{groIdx}
+</update>
+</mapper>

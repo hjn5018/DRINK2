@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovItmanLocationDAO">
+	<select id="selectLocationList" parameterType="egovframework.itman.location.service.EgovItmanLocationVO" resultType="egovframework.itman.location.service.EgovItmanLocationVO">
+		SELECT
+			* 
+		FROM 
+			ITM_LOCATION
+		WHERE
+			GRO_IDX = #{groIdx}
+		AND DEL_YN = 'N'
+		<if test="locName != null and locName != ''">
+			AND LOC_NAME LIKE CONCAT('%', #{locName}, '%')
+		</if>
+		ORDER BY LOC_IDX DESC
+		LIMIT #{firstIndex}, #{recordCountPerPage}
+	</select>
+	
+	<select id="selectLocationListTotCnt" parameterType="egovframework.itman.location.service.EgovItmanLocationVO" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			ITM_LOCATION
+		WHERE
+			GRO_IDX = #{groIdx}
+		AND DEL_YN = 'N'
+		<if test="locName != null and locName != ''">
+			AND LOC_NAME LIKE CONCAT('%', #{locName}, '%')
+		</if>
+	</select>
+	
+	<insert id="insertLocation" parameterType="egovframework.itman.location.service.EgovItmanLocationVO">
+		INSERT INTO
+			ITM_LOCATION
+			(GRO_IDX, LOC_CODE, LOC_NAME, SL_NOTE, REG_DATE, REG_IDX)
+        VALUES
+        	(#{groIdx}, #{locCode}, #{locName}, #{slNote}, now(), #{regIdx})
+	</insert>
+	<select id="selectLocationCount" parameterType="map" resultType="int">
+    SELECT 
+    	COUNT(*)
+    FROM 
+    	ITM_LOCATION
+    WHERE 
+    	GRO_IDX = #{groIdx}
+     AND 
+      	DEL_YN = 'N'
+    <if test="search != null and like != null and like != ''">
+        <choose>
+            <when test="search == 'name'">
+                AND LOC_NAME LIKE CONCAT('%', #{like}, '%')
+            </when>
+            <otherwise>
+                AND ( LOC_CODE LIKE CONCAT('%', #{like}, '%') )
+            </otherwise>
+        </choose>
+    </if>
+</select>
+<select id="selectLocationMap" parameterType="map" resultType="egovframework.itman.location.service.EgovItmanLocationVO">
+	SELECT 
+		* 
+	FROM 
+		ITM_LOCATION
+	WHERE 
+		GRO_IDX = #{groIdx}
+	AND 
+		DEL_YN = 'N'
+
+	<if test="search != null and like != null and like != ''">
+		<choose>
+			<when test="search == 'code'">
+				AND LOC_CODE LIKE CONCAT('%', #{like}, '%')
+			</when>
+			<when test="search == 'name'">
+				AND LOC_NAME LIKE CONCAT('%', #{like}, '%')
+			</when>
+			<otherwise>
+				AND (
+					LOC_CODE LIKE CONCAT('%', #{like}, '%')
+					OR LOC_NAME LIKE CONCAT('%', #{like}, '%')
+				)
+			</otherwise>
+		</choose>
+	</if>
+	ORDER BY LOC_IDX DESC
+    
+    <choose>
+    	<when test="start != null and pageResult != null">
+      		LIMIT #{start}, #{pageResult}
+    	</when>
+	    <otherwise>
+    		LIMIT 0, 10
+    	</otherwise>
+	</choose>
+</select>
+<select id="selectLocationOne" parameterType="map" resultType="egovframework.itman.location.service.EgovItmanLocationVO">
+  SELECT
+  	*
+  FROM
+  	ITM_LOCATION
+  WHERE 
+  	LOC_IDX = #{locIdx}  
+   AND 
+   	GRO_IDX = #{groIdx}
+</select>
+<update id="updateLocation"  parameterType="egovframework.itman.location.service.EgovItmanLocationVO">
+	UPDATE 
+		ITM_LOCATION
+	<set>
+    	LOC_CODE = #{locCode},
+    	LOC_NAME = #{locName},
+    	MOD_DATE = now(),
+    	MOD_IDX = #{modIdx},
+    	SL_NOTE = #{slNote}
+  	</set>
+  	WHERE 
+  		LOC_IDX = #{locIdx}  
+    AND 
+    	GRO_IDX = #{groIdx}  
+</update>
+<update id="deleteLocation"  parameterType="egovframework.itman.location.service.EgovItmanLocationVO">
+	UPDATE 
+		ITM_LOCATION
+	<set>
+    	DEL_YN = 'Y',
+    	DEL_IDX = #{delIdx},
+    	DEL_DATE = now(),
+    	SL_NOTE = #{slNote}
+  	</set>
+  	WHERE 
+  		LOC_IDX = #{locIdx}  
+    AND 
+    	GRO_IDX = #{groIdx}  
+</update>
+</mapper>

@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovItmanStateDAO">
+
+	<select id="selectStateList"
+		parameterType="egovframework.itman.group.service.EgovItmanGroupVO"
+		resultType="egovframework.itman.state.service.EgovItmanStateVO">
+
+		SELECT
+		*
+		FROM
+		ITM_STATE
+		WHERE
+		GRO_IDX = #{groIdx}
+		AND DEL_YN =
+		'N'
+
+	</select>
+
+	<insert id="insertState"
+		parameterType="egovframework.itman.state.service.EgovItmanStateVO">
+		INSERT INTO
+		ITM_STATE
+		(GRO_IDX, STA_CODE, STA_NAME,
+		STA_YN, STA_NOTE,
+		REG_DATE, REG_IDX)
+		VALUES
+		(#{groIdx}, #{staCode},
+		#{staName}, 'Y', #{staNote}, now(), #{regIdx})
+	</insert>
+
+	<select id="selectStateCount" parameterType="map"
+		resultType="int">
+		SELECT
+		COUNT(*)
+		FROM
+		ITM_STATE
+		WHERE
+		GRO_IDX = #{groIdx}
+		AND
+		DEL_YN = 'N'
+		<if test="search != null and like != null and like != ''">
+			<choose>
+				<when test="search == 'name'">
+					AND STA_NAME LIKE CONCAT('%', #{like}, '%')
+				</when>
+				<otherwise>
+					AND ( STA_CODE LIKE CONCAT('%', #{like}, '%') )
+					AND (
+					STA_NOTE LIKE CONCAT('%', #{like}, '%') )
+				</otherwise>
+			</choose>
+		</if>
+	</select>
+
+	<select id="selectStateMap" parameterType="map"
+		resultType="egovframework.itman.state.service.EgovItmanStateVO">
+		SELECT
+		*, (SELECT COUNT(*) FROM ITM_ASSET WHERE GRO_IDX = #{groIdx} and
+		STA_IDX = ITS.STA_IDX and DEL_YN = 'N') as staCnt
+		FROM
+		ITM_STATE AS ITS
+		WHERE
+		GRO_IDX = #{groIdx}
+		AND
+		DEL_YN = 'N'
+
+		<if test="search != null and like != null and like != ''">
+			<choose>
+				<when test="search == 'code'">
+					AND STA_CODE LIKE CONCAT('%', #{like}, '%')
+				</when>
+				<when test="search == 'name'">
+					AND STA_NAME LIKE CONCAT('%', #{like}, '%')
+				</when>
+				<when test="search == 'note'">
+					AND STA_NOTE LIKE CONCAT('%', #{like}, '%')
+				</when>
+				<otherwise>
+					AND (
+					STA_CODE LIKE CONCAT('%', #{like}, '%')
+					OR STA_NAME
+					LIKE CONCAT('%', #{like}, '%')
+					OR STA_NOTE LIKE CONCAT('%', #{like},
+					'%')
+					)
+				</otherwise>
+			</choose>
+		</if>
+		ORDER BY STA_IDX DESC
+
+		<choose>
+			<when test="start != null and pageResult != null">
+				LIMIT #{start}, #{pageResult}
+			</when>
+			<otherwise>
+				LIMIT 0, 10
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="selectStateOne" parameterType="map"
+		resultType="egovframework.itman.state.service.EgovItmanStateVO">
+		SELECT
+		*
+		FROM
+		ITM_STATE
+		WHERE
+		STA_IDX = #{staIdx}
+		AND
+		GRO_IDX =
+		#{groIdx}
+	</select>
+
+	<update id="updateState"
+		parameterType="egovframework.itman.state.service.EgovItmanStateVO">
+		UPDATE
+		ITM_STATE
+		<set>
+			STA_CODE = #{staCode},
+			STA_NAME = #{staName},
+			MOD_DATE = now(),
+			MOD_IDX = #{modIdx},
+			STA_NOTE = #{staNote}
+		</set>
+		WHERE
+		STA_IDX = #{staIdx}
+		AND
+		GRO_IDX = #{groIdx}
+	</update>
+<update id="deleteState"  parameterType="egovframework.itman.state.service.EgovItmanStateVO">
+	UPDATE 
+		ITM_STATE
+		<set>
+			DEL_YN = 'Y',
+			DEL_IDX = #{delIdx},
+			DEL_DATE = now(),
+			STA_NOTE = #{staNote}
+		</set>
+		WHERE
+		STA_IDX = #{staIdx}
+		AND
+		GRO_IDX = #{groIdx}
+	</update>
+</mapper>

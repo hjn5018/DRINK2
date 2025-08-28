@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovItmanDivisionDAO">
+	
+	<select id="selectDepartList" parameterType="egovframework.itman.division.service.EgovItmanDivisionSearchVO" resultType="egovMap">
+		SELECT
+			DIV_IDX,
+			DIV_CODE,
+			DIV_NAME,
+			DIV_YN,
+			DEL_YN
+		FROM
+			ITM_DIVISION
+		WHERE
+			GRO_IDX = #{groIdx}
+			AND DEL_YN = 'N'
+<!-- 		<if test="searchKeyword != null and searchKeyword != ''"> -->
+<!-- 			<if test="searchCondition == 'all' or searchCondition == 'name'"> -->
+<!-- 				AND DIV_NAME LIKE CONCAT('%', #{searchKeyword}, '%') -->
+<!-- 			</if> -->
+<!-- 			<if test="searchCondition == 'all' or searchCondition == 'code'"> -->
+<!-- 				OR DIV_CODE LIKE CONCAT('%', #{searchKeyword}, '%') -->
+<!-- 			</if> -->
+<!-- 		</if> -->
+		
+		
+			<if test="searchCondition != null and searchKeyword != null and searchKeyword != ''">
+		<choose>
+			<when test="searchCondition == 'name'">
+				AND DIV_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+			</when>
+			<when test="searchCondition == 'code'">
+				AND DIV_CODE LIKE CONCAT('%', #{searchKeyword}, '%')
+			</when>
+			<otherwise>
+				AND (
+					DIV_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+					OR DIV_CODE LIKE CONCAT('%', #{searchKeyword}, '%')
+				)
+			</otherwise>
+		</choose>
+	</if>
+		
+		
+		
+		ORDER BY DIV_IDX DESC
+		LIMIT #{firstIndex}, #{recordCountPerPage}
+	</select>
+	
+	<select id="selectDepartListTotCnt" parameterType="egovframework.itman.division.service.EgovItmanDivisionSearchVO" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			ITM_DIVISION
+		WHERE
+			GRO_IDX = #{groIdx}
+			AND DEL_YN = 'N'
+		<if test="searchCondition != null and searchKeyword != null and searchKeyword != ''">
+		<choose>
+			<when test="searchCondition == 'name'">
+				AND DIV_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+			</when>
+			<when test="searchCondition == 'code'">
+				AND DIV_CODE LIKE CONCAT('%', #{searchKeyword}, '%')
+			</when>
+			<otherwise>
+				AND (
+					DIV_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+					OR DIV_CODE LIKE CONCAT('%', #{searchKeyword}, '%')
+				)
+			</otherwise>
+		</choose>
+	</if>
+	</select>
+	<insert id="insertDivision" parameterType="egovframework.itman.division.service.EgovItmanDivisionVO">
+    INSERT INTO ITM_DIVISION (
+        GRO_IDX,
+        DIV_CODE,
+        DIV_NAME,
+        DIV_YN,
+        REG_DATE,
+        REG_IDX,
+        DEL_YN
+    ) VALUES (
+        #{groIdx},
+        #{divCode},
+        #{divName},
+        #{divYn},
+        NOW(),
+        #{regIdx},
+        'N'
+    )
+</insert>
+    <select id="selectDivisionDetail" parameterType="String" resultType="egovframework.itman.division.service.EgovItmanDivisionVO">
+        SELECT
+            DIV_IDX,
+            GRO_IDX,
+            DIV_CODE,
+            DIV_NAME,
+            DIV_YN
+        FROM
+            ITM_DIVISION
+        WHERE
+            DIV_IDX = #{divIdx}
+    </select>
+    
+    <update id="updateDivision" parameterType="egovframework.itman.division.service.EgovItmanDivisionVO">
+        UPDATE ITM_DIVISION
+        SET
+            DIV_CODE = #{divCode},
+            DIV_NAME = #{divName},
+            DIV_YN = #{divYn},
+            MOD_DATE = NOW(),
+            MOD_IDX = #{modIdx}
+        WHERE
+            DIV_IDX = #{divIdx}
+    </update>
+    <update id="deleteDivision">
+    UPDATE ITM_DIVISION
+    SET 
+        DEL_YN = 'Y',
+        DEL_IDX = #{delIdx},
+        DEL_DATE = NOW()
+        
+    WHERE 
+        DIV_IDX = #{divIdx}
+</update>
+<select id="selectDivisionList" parameterType="String" resultType="egovframework.itman.division.service.EgovItmanDivisionVO">
+    SELECT
+        DIV_IDX,
+        DIV_NAME
+    FROM
+        ITM_DIVISION
+    WHERE
+        GRO_IDX = #{groIdx}
+        AND DEL_YN = 'N'
+</select>
+	<select id="selectDivision" parameterType="egovframework.itman.employee.service.EgovItmanEmployeeVO" resultType="String">
+		
+			SELECT
+				DIV_NAME
+			FROM
+				ITM_DIVISION
+			WHERE
+				DIV_IDX = #{divIdx}
+				 
+	</select>
+
+	<select id="selectDivisionCode" parameterType="map" resultType="string">
+		SELECT DIV_CODE 
+		FROM ITM_DIVISION 
+		WHERE GRO_IDX = #{groIdx} AND DIV_IDX = #{divIdx}
+	</select>
+
+</mapper>

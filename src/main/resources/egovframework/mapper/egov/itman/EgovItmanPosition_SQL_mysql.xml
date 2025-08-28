@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovItmanPositionDAO">
+
+<sql id="commonWhere">
+  WHERE
+    GRO_IDX = #{groIdx}
+    AND DEL_YN = 'N'
+  <if test="searchKeyword != null and searchKeyword != ''">
+    <choose>
+      <when test="searchCondition == 'all'">
+        AND (POS_NAME LIKE CONCAT('%', #{searchKeyword}, '%') OR POS_CODE LIKE CONCAT('%', #{searchKeyword}, '%'))
+      </when>
+      <when test="searchCondition == 'name'">
+        AND POS_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+      </when>
+      <when test="searchCondition == 'code'">
+        AND POS_CODE LIKE CONCAT('%', #{searchKeyword}, '%')
+      </when>
+    </choose>
+  </if>
+</sql>
+
+<select id="selectPositionList"
+        parameterType="egovframework.itman.position.service.EgovItmanPositionSearchVO"
+        resultType="egovframework.itman.position.service.EgovItmanPositionVO">
+  SELECT
+    POS_IDX,
+    POS_CODE,
+    POS_NAME
+  FROM ITM_POSITION
+  <include refid="commonWhere"/>
+  ORDER BY
+  	POS_IDX DESC
+  LIMIT #{firstIndex}, #{recordCountPerPage}
+</select>
+
+<select id="selectPositionListTotCnt"
+        parameterType="egovframework.itman.position.service.EgovItmanPositionSearchVO"
+        resultType="int">
+  SELECT COUNT(*)
+  FROM ITM_POSITION
+  <include refid="commonWhere"/>
+</select>
+
+<update id="deletePosition" parameterType="egovframework.itman.position.service.EgovItmanPositionVO">
+  UPDATE ITM_POSITION
+  SET 
+    DEL_YN = 'Y',
+    DEL_IDX = #{delIdx},
+    DEL_DATE = NOW()
+  WHERE 
+    POS_IDX = #{posIdx}
+</update>
+
+<insert id="insertPosition"
+        parameterType="egovframework.itman.position.service.EgovItmanPositionVO">
+  INSERT INTO ITM_POSITION (
+    GRO_IDX, POS_NAME, POS_CODE, SL_NOTE, DEL_YN, REG_IDX, REG_DATE
+  ) VALUES (
+    #{groIdx}, #{posName}, #{posCode}, #{slNote}, 'N', #{regIdx}, NOW()
+  )
+</insert>
+
+<update id="updatePosition"
+        parameterType="egovframework.itman.position.service.EgovItmanPositionVO">
+  UPDATE ITM_POSITION
+  SET
+    POS_NAME = #{posName},
+    POS_CODE = #{posCode},
+    SL_NOTE  = #{slNote}
+  WHERE POS_IDX = #{posIdx}
+</update>
+
+<select id="selectPositionDetail"
+        parameterType="String"
+        resultType="egovframework.itman.position.service.EgovItmanPositionVO">
+  SELECT
+    POS_IDX,
+    GRO_IDX,
+    POS_CODE,
+    POS_NAME,
+    SL_NOTE
+  FROM ITM_POSITION
+  WHERE
+    POS_IDX = #{posIdx}
+    AND DEL_YN = 'N'
+</select>
+
+</mapper>

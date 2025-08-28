@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovItmanAssetDAO">
+	<select id="selectAssetList" parameterType="egovframework.itman.asset.service.EgovItmanAssetVO" resultType="egovframework.itman.asset.service.EgovItmanAssetVO">
+	
+			SELECT
+		        ASS.*,
+		        ASS_CAT.ASS_CAT_NAME AS assCatName,
+		        STA.STA_NAME AS staName,
+		        EMP.EMP_NAME AS empName,
+		        LOC.LOC_NAME AS locName,
+		        SUP.SUP_NAME AS supName
+		    FROM 
+		    	ITM_ASSET ASS
+		    LEFT JOIN ITM_ASSET_CATEGORY ASS_CAT ON ASS.ASS_CAT_IDX = ASS_CAT.ASS_CAT_IDX
+		    LEFT JOIN ITM_STATE STA ON ASS.STA_IDX = STA.STA_IDX
+		    LEFT JOIN ITM_EMPLOYE EMP ON ASS.EMP_IDX = EMP.EMP_IDX
+		    LEFT JOIN ITM_LOCATION LOC ON ASS.LOC_IDX = LOC.LOC_IDX
+		    LEFT JOIN ITM_SUPPLIER SUP ON ASS.SUP_IDX = SUP.SUP_IDX
+		    WHERE
+		    	ASS.GRO_IDX = #{groIdx}
+		    AND ASS.DEL_YN = 'N'
+		    <if test="searchCondition == 'all' or searchCondition == ''">
+				<if test="searchKeyword != null and searchKeyword != ''">
+					AND (ASS.ASS_ULID LIKE CONCAT('%', #{searchKeyword}, '%') OR ASS.ASS_NAME LIKE CONCAT('%', #{searchKeyword}, '%') OR ASS_CAT.ASS_CAT_NAME LIKE CONCAT('%', #{searchKeyword}, '%'))
+				</if>
+			</if>
+			<if test="searchCondition == 'ASS_ULID'">
+				<if test="searchKeyword != null and searchKeyword != ''">
+					AND ASS.ASS_ULID LIKE CONCAT('%', #{searchKeyword}, '%')
+				</if>
+			</if>
+			<if test="searchCondition == 'ASS_NAME'">
+				<if test="searchKeyword != null and searchKeyword != ''">
+					AND ASS.ASS_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+				</if>
+			</if>
+			<if test="searchCondition == 'ASS_CAT_NAME'">
+				<if test="searchKeyword != null and searchKeyword != ''">
+					AND ASS_CAT.ASS_CAT_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+				</if>
+			</if>
+			ORDER BY
+				ASS.ASS_IDX DESC
+			LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+				
+	</select>
+	
+	<select id="selectAssetListTotCnt" parameterType="egovframework.itman.asset.service.EgovItmanAssetVO" resultType="int">
+			SELECT
+		        COUNT(*)
+		    FROM 
+		    	ITM_ASSET ASS
+		    LEFT JOIN ITM_ASSET_CATEGORY ASS_CAT ON ASS.ASS_CAT_IDX = ASS_CAT.ASS_CAT_IDX
+		    WHERE
+		    	ASS.GRO_IDX = #{groIdx}
+		    AND ASS.DEL_YN = 'N'
+		    <if test="searchCondition == 'all' or searchCondition == ''">
+				<if test="searchKeyword != null and searchKeyword != ''">
+					AND (ASS.ASS_ULID LIKE CONCAT('%', #{searchKeyword}, '%') OR ASS.ASS_NAME LIKE CONCAT('%', #{searchKeyword}, '%') OR ASS_CAT.ASS_CAT_NAME LIKE CONCAT('%', #{searchKeyword}, '%'))
+				</if>
+			</if>
+			<if test="searchCondition == 'ASS_ULID'">
+				<if test="searchKeyword != null and searchKeyword != ''">
+					AND ASS.ASS_ULID LIKE CONCAT('%', #{searchKeyword}, '%')
+				</if>
+			</if>
+			<if test="searchCondition == 'ASS_NAME'">
+				<if test="searchKeyword != null and searchKeyword != ''">
+					AND ASS.ASS_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+				</if>
+			</if>
+			<if test="searchCondition == 'ASS_CAT_NAME'">
+				<if test="searchKeyword != null and searchKeyword != ''">
+					AND ASS_CAT.ASS_CAT_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+				</if>
+			</if>
+	</select>
+	
+	<insert id="insertAsset" parameterType="egovframework.itman.group.service.EgovItmanGroupVO">
+		
+		INSERT INTO
+			ITM_ASSET
+			(GRO_IDX, ASS_NAME, ASS_CAT_IDX, STA_IDX, LOC_IDX, EMP_IDX, SUP_IDX, BUY_DATE, PRICE, REG_IDX, IMAGE, REG_DATE, ASS_ULID)
+		VALUES
+			(#{groIdx}, #{assName}, #{assCatIdx}, #{staIdx}, #{locIdx}, #{empIdx}, #{supIdx}, #{buyDate}, #{price}, #{regIdx}, #{image}, now(), #{assUlid})
+		
+	</insert>
+	
+	<select id="selectAssetByUlid" parameterType="string" resultType="egovframework.itman.asset.service.EgovItmanAssetVO">
+		SELECT
+			*
+		FROM 
+			ITM_ASSET ASS
+		WHERE
+			ASS.ASS_ULID = #{assUlid}
+		AND ASS.DEL_YN = 'N'
+	</select>
+	
+	<select id="selectAsset" parameterType="String" resultType="egovframework.itman.asset.service.EgovItmanAssetVO">
+		
+		SELECT
+			*
+		FROM 
+			ITM_ASSET ASS
+		    LEFT JOIN ITM_ASSET_CATEGORY ASS_CAT ON ASS.ASS_CAT_IDX = ASS_CAT.ASS_CAT_IDX
+		    LEFT JOIN ITM_STATE STA ON ASS.STA_IDX = STA.STA_IDX
+		    LEFT JOIN ITM_EMPLOYE EMP ON ASS.EMP_IDX = EMP.EMP_IDX
+		    LEFT JOIN ITM_LOCATION LOC ON ASS.LOC_IDX = LOC.LOC_IDX
+		    LEFT JOIN ITM_SUPPLIER SUP ON ASS.SUP_IDX = SUP.SUP_IDX
+		WHERE
+			ASS_IDX = #{assIdx}
+		AND ASS.DEL_YN = 'N'
+	</select>
+	
+	<update id="updateAssetName" parameterType="egovframework.itman.asset.service.EgovItmanAssetVO">
+		UPDATE ITM_ASSET
+		SET ASS_NAME = #{assName},
+		    MOD_DATE = now(),
+		    MOD_IDX = #{modIdx}
+		WHERE ASS_IDX = #{assIdx}
+	</update>
+	
+	<update id="updateAssetCategory" parameterType="egovframework.itman.asset.service.EgovItmanAssetVO">
+		UPDATE ITM_ASSET SET ASS_CAT_IDX = #{assCatIdx}, MOD_DATE = now(), MOD_IDX = #{modIdx} WHERE ASS_IDX = #{assIdx}
+	</update>
+	<update id="updateAssetState" parameterType="egovframework.itman.asset.service.EgovItmanAssetVO">
+		UPDATE ITM_ASSET SET STA_IDX = #{staIdx}, MOD_DATE = now(), MOD_IDX = #{modIdx} WHERE ASS_IDX = #{assIdx}
+	</update>
+	<update id="updateAssetLocation" parameterType="egovframework.itman.asset.service.EgovItmanAssetVO">
+		UPDATE ITM_ASSET SET LOC_IDX = #{locIdx}, MOD_DATE = now(), MOD_IDX = #{modIdx} WHERE ASS_IDX = #{assIdx}
+	</update>
+	<update id="updateAssetEmployee" parameterType="egovframework.itman.asset.service.EgovItmanAssetVO">
+		UPDATE ITM_ASSET SET EMP_IDX = #{empIdx}, MOD_DATE = now(), MOD_IDX = #{modIdx} WHERE ASS_IDX = #{assIdx}
+	</update>
+	<update id="updateAssetSupplier" parameterType="egovframework.itman.asset.service.EgovItmanAssetVO">
+		UPDATE ITM_ASSET SET SUP_IDX = #{supIdx}, MOD_DATE = now(), MOD_IDX = #{modIdx} WHERE ASS_IDX = #{assIdx}
+	</update>
+	<update id="updateAssetBuyDate" parameterType="egovframework.itman.asset.service.EgovItmanAssetVO">
+		UPDATE ITM_ASSET SET BUY_DATE = #{buyDate}, MOD_DATE = now(), MOD_IDX = #{modIdx} WHERE ASS_IDX = #{assIdx}
+	</update>
+	<update id="updateAssetPrice" parameterType="egovframework.itman.asset.service.EgovItmanAssetVO">
+		UPDATE ITM_ASSET SET PRICE = #{price}, MOD_DATE = now(), MOD_IDX = #{modIdx} WHERE ASS_IDX = #{assIdx}
+	</update>
+	<update id="updateAssetImage" parameterType="egovframework.itman.asset.service.EgovItmanAssetVO">
+		UPDATE ITM_ASSET SET IMAGE = #{image}, MOD_DATE = now(), MOD_IDX = #{modIdx} WHERE ASS_IDX = #{assIdx}
+	</update>
+	
+	<update id="deleteAsset" parameterType="java.util.Map">
+		
+		UPDATE
+			ITM_ASSET
+		SET
+			DEL_YN = 'Y',
+			MOD_DATE = now(),
+			MOD_IDX = #{memIdx}
+		WHERE
+			ASS_IDX = #{assIdx}
+		
+	</update>
+
+	<select id="selectNextUlid" parameterType="map" resultType="string">
+		SELECT
+			CONCAT(#{baseUlid}, '-',
+					LPAD(IFNULL(MAX(CAST(SUBSTRING_INDEX(ASS_ULID, '-', -1) AS UNSIGNED)) + 1, 1), 2, '0')) AS next_ulid
+		FROM
+			ITM_ASSET
+		WHERE
+			GRO_IDX = #{groIdx}
+		AND ASS_ULID LIKE CONCAT(#{baseUlid}, '-%')
+	</select>
+
+</mapper>

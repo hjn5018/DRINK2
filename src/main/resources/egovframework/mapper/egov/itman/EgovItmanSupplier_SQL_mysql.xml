@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovItmanSupplierDAO">
+<select id="selectSupplierList" parameterType="map" resultType="egovframework.itman.supplier.service.EgovItmanSupplierVO">
+	SELECT 
+		* 
+	FROM 
+		ITM_SUPPLIER
+	WHERE 
+		GRO_IDX = #{groIdx}
+	AND 
+		DEL_YN = 'N'
+
+	<if test="search != null and like != null and like != ''">
+		<choose>
+			<when test="search == 'name'">
+				AND SUP_NAME LIKE CONCAT('%', #{like}, '%')
+			</when>
+			<when test="search == 'bnum'">
+				AND SUP_BNUM LIKE CONCAT('%', #{like}, '%')
+			</when>
+			<when test="search == 'mail'">
+				AND SUP_MAIL LIKE CONCAT('%', #{like}, '%')
+			</when>
+			<when test="search == 'tel'">
+				AND SUP_TEL LIKE CONCAT('%', #{like}, '%')
+			</when>
+			<otherwise>
+				AND (
+					SUP_NAME LIKE CONCAT('%', #{like}, '%')
+				OR SUP_BNUM LIKE CONCAT('%', #{like}, '%')
+				OR SUP_MAIL LIKE CONCAT('%', #{like}, '%')
+				OR SUP_TEL LIKE CONCAT('%', #{like}, '%')
+				)
+			</otherwise>
+		</choose>
+	</if>
+	ORDER BY SUP_IDX DESC
+    
+    <choose>
+    	<when test="start != null and pageResult != null">
+      		LIMIT #{start}, #{pageResult}
+    	</when>
+	    <otherwise>
+    		LIMIT 0, 10
+    	</otherwise>
+	</choose>
+</select>
+	<insert id="insertSupplier" parameterType="egovframework.itman.supplier.service.EgovItmanSupplierVO">
+		
+		INSERT INTO
+			ITM_SUPPLIER
+			(GRO_IDX, SUP_NAME, SUP_BNUM, SUP_MAIL, SUP_TEL, REG_DATE, REG_IDX, SUP_MEMO)
+		VALUES
+			(#{groIdx}, #{supName}, #{supBnum}, #{supMail}, #{supTel}, NOW(), #{regIdx}, #{supMemo})
+		
+	</insert>
+	<select id="selectSupplierCount" parameterType="map" resultType="int">
+    SELECT 
+    	COUNT(*)
+    FROM 
+    	ITM_SUPPLIER
+    WHERE 
+    	GRO_IDX = #{groIdx}
+     AND 
+      	DEL_YN = 'N'
+    <if test="search != null and like != null and like != ''">
+        <choose>
+            <when test="search == 'name'">
+                AND SUP_NAME LIKE CONCAT('%', #{like}, '%')
+            </when>
+            <otherwise>
+                AND ( SUP_NAME LIKE CONCAT('%', #{like}, '%')
+                    OR SUP_BNUM LIKE CONCAT('%', #{like}, '%')
+                    OR SUP_MAIL LIKE CONCAT('%', #{like}, '%')
+                    OR SUP_TEL LIKE CONCAT('%', #{like}, '%') )
+            </otherwise>
+        </choose>
+    </if>
+</select>
+<update id="updateSupplier"  parameterType="egovframework.itman.supplier.service.EgovItmanSupplierVO">
+	UPDATE 
+		ITM_SUPPLIER
+	<set>
+    	SUP_NAME = #{supName},
+    	SUP_BNUM = #{supBnum},
+    	SUP_MAIL = #{supMail},
+    	SUP_TEL = #{supTel},
+    	SUP_MEMO = #{supMemo},
+    	MOD_DATE = now(),
+    	MOD_IDX = #{regIdx}
+  	</set>
+  	WHERE 
+  		SUP_IDX = #{supIdx}  
+    AND 
+    	GRO_IDX = #{groIdx}  
+</update>
+<select id="selectSupplierOne" parameterType="map" resultType="egovframework.itman.supplier.service.EgovItmanSupplierVO">
+  SELECT
+  	*
+  FROM
+  	ITM_SUPPLIER
+  WHERE 
+  	SUP_IDX = #{supIdx}  
+   AND 
+   	GRO_IDX = #{groIdx}
+</select>
+<update id="deleteSupplier"  parameterType="egovframework.itman.supplier.service.EgovItmanSupplierVO">
+	UPDATE 
+		ITM_SUPPLIER
+	<set>
+    	DEL_YN = 'Y',
+    	DEL_IDX = #{delIdx},
+    	DEL_DATE = now(),
+    	SUP_MEMO = #{supMemo}
+  	</set>
+  	WHERE 
+  		SUP_IDX = #{supIdx}  
+    AND 
+    	GRO_IDX = #{groIdx}  
+</update>
+</mapper>
